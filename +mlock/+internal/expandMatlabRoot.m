@@ -6,7 +6,7 @@ function p = expandMatlabRoot(storedPath)
 % unchanged.
 %
 % Syntax:
-%  p = matlabdeps.internal.expandMatlabRoot(storedPath) Expand STOREDPATH.
+%  p = mlock.internal.expandMatlabRoot(storedPath) Expand STOREDPATH.
 %
 % Input Arguments:
 %  - storedPath (string) - A path possibly beginning with "$MATLABROOT/".
@@ -18,7 +18,7 @@ s = string(storedPath);
 token = "$MATLABROOT/";
 if startsWith(s, token)
     rel = extractAfter(s, strlength(token));
-    p = matlabdeps.internal.toPosix(fullfile(matlabroot, char(rel)));
+    p = mlock.internal.toPosix(fullfile(matlabroot, char(rel)));
 else
     p = s;
 end

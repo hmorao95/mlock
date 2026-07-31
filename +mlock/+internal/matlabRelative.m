@@ -6,7 +6,7 @@ function p = matlabRelative(absFile)
 % are returned unchanged (posix-separated).
 %
 % Syntax:
-%  p = matlabdeps.internal.matlabRelative(absFile) Relativize ABSFILE.
+%  p = mlock.internal.matlabRelative(absFile) Relativize ABSFILE.
 %
 % Input Arguments:
 %  - absFile (string) - An absolute file path.
@@ -14,10 +14,10 @@ function p = matlabRelative(absFile)
 % Output Arguments:
 %  - p (string) - "$MATLABROOT/<rel>" when under matlabroot, else the input.
 
-rel = matlabdeps.internal.toRel(absFile, string(matlabroot));
+rel = mlock.internal.toRel(absFile, string(matlabroot));
 if strlength(rel) > 0
     p = "$MATLABROOT/" + rel;
 else
-    p = matlabdeps.internal.toPosix(absFile);
+    p = mlock.internal.toPosix(absFile);
 end
 end

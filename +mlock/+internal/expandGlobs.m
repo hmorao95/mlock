@@ -5,7 +5,7 @@ function rels = expandGlobs(patterns, root)
 % caught early.
 %
 % Syntax:
-%  rels = matlabdeps.internal.expandGlobs(patterns, root) Expand PATTERNS
+%  rels = mlock.internal.expandGlobs(patterns, root) Expand PATTERNS
 %    against ROOT.
 %
 % Input Arguments:
@@ -17,7 +17,7 @@ function rels = expandGlobs(patterns, root)
 %  - rels (string) -
 %    Unique, sorted project-relative posix paths for every matching file.
 rels = strings(0);
-root = matlabdeps.internal.absPath(root);   % canonical, so toRel prefixes match
+root = mlock.internal.absPath(root);   % canonical, so toRel prefixes match
 for i = 1:numel(patterns)
     pat = char(patterns(i));
     % dir() expands the wildcard (including '**' for recursive matches) and,
@@ -27,11 +27,11 @@ for i = 1:numel(patterns)
     % A pattern that matches nothing is almost always a typo in a pinned path;
     % fail loudly rather than silently omitting a file the caller expected.
     if isempty(listing)
-        error('matlabdeps:extra:noMatch', 'Extra pattern matched no files: %s', patterns(i));
+        error('mlock:extra:noMatch', 'Extra pattern matched no files: %s', patterns(i));
     end
     for k = 1:numel(listing)
         abs = fullfile(listing(k).folder, listing(k).name);
-        rel = matlabdeps.internal.toRel(abs, root);
+        rel = mlock.internal.toRel(abs, root);
         % Guard against a pattern escaping the root (e.g. "../x"): only pin
         % files that actually live under the project.
         if strlength(rel) > 0

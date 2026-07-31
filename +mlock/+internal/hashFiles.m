@@ -7,9 +7,9 @@ function entries = hashFiles(relPaths, root, normalizeText)
 % byte-exact.
 %
 % Syntax:
-%  entries = matlabdeps.internal.hashFiles(relPaths, root) Hash each file.
+%  entries = mlock.internal.hashFiles(relPaths, root) Hash each file.
 %
-%  entries = matlabdeps.internal.hashFiles(relPaths, root, normalizeText)
+%  entries = mlock.internal.hashFiles(relPaths, root, normalizeText)
 %    Optionally normalize newlines of text files before hashing.
 %
 % Input Arguments:
@@ -34,9 +34,9 @@ for i = 1:numel(relPaths)
         d = dir(abs);
         % Normalize newlines only for recognized text files (never binaries),
         % and only when the caller asked for it.
-        normalize = normalizeText && matlabdeps.internal.isTextFile(rel);
+        normalize = normalizeText && mlock.internal.isTextFile(rel);
         entries(i).bytes  = d.bytes;   % raw on-disk size (pre-normalization)
-        entries(i).sha256 = char(matlabdeps.internal.sha256File(abs, normalize));
+        entries(i).sha256 = char(mlock.internal.sha256File(abs, normalize));
     else
         % File named but not present: sentinel values instead of a hard error,
         % so a lock can still be produced and verify/compare can flag it.

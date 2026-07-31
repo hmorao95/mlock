@@ -4,18 +4,18 @@ function [ok, report] = check(lockPath, opts)
 % Checks that the MATLAB release and the MathWorks products recorded in the lock
 % are available in the running environment, and prints a pass/fail report.
 % Answers "can this machine run the locked project?" (products and release),
-% whereas matlabdeps.verify answers "have the project files drifted?".
+% whereas mlock.verify answers "have the project files drifted?".
 %
 % Syntax:
-%  ok = matlabdeps.check(lockPath) Check the current environment against the
+%  ok = mlock.check(lockPath) Check the current environment against the
 %    lockfile at LOCKPATH.
 %
-%  [ok, report] = matlabdeps.check(lockPath, Name, Value) Also return a detail
+%  [ok, report] = mlock.check(lockPath, Name, Value) Also return a detail
 %    struct and control behavior with name-value options.
 %
 % Input Arguments:
 %  - lockPath (string) -
-%    Path to the lockfile written by matlabdeps.lock.
+%    Path to the lockfile written by mlock.lock.
 %
 %  - Name-Value Arguments -
 %    - RequireSameRelease (logical) -
@@ -38,14 +38,14 @@ function [ok, report] = check(lockPath, opts)
 % Usage:
 %  Example 1 - Check the current machine::
 %
-%    matlabdeps.check("matlabdeps.lock.json")
+%    mlock.check("mlock.lock.json")
 %
 %  Example 2 - Require the exact locked release::
 %
-%    ok = matlabdeps.check("matlabdeps.lock.json", RequireSameRelease=true);
+%    ok = mlock.check("mlock.lock.json", RequireSameRelease=true);
 %
 % See also:
-%   matlabdeps.lock, matlabdeps.verify
+%   mlock.lock, mlock.verify
 
 arguments
     lockPath (1,1) string
@@ -54,16 +54,16 @@ arguments
     opts.Verbose (1,1) logical = true
 end
 
-lockPath = matlabdeps.internal.absPath(lockPath);
+lockPath = mlock.internal.absPath(lockPath);
 if ~isfile(lockPath)
-    error('matlabdeps:check:noLock', 'Lock file not found: %s', lockPath);
+    error('mlock:check:noLock', 'Lock file not found: %s', lockPath);
 end
 lk = jsondecode(fileread(lockPath));
 
 % Accumulates to false as soon as any required check fails (logical AND below).
 ok = true;
 if opts.Verbose
-    fprintf('\n===== matlabdeps.check =====\nLock: %s\n', lockPath);
+    fprintf('\n===== mlock.check =====\nLock: %s\n', lockPath);
 end
 
 % --- MATLAB release ---

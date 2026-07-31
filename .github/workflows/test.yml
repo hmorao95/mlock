@@ -1,4 +1,4 @@
-name: Test matlabdeps
+name: Test mlock
 
 on:
   push:
@@ -23,7 +23,7 @@ jobs:
           release: latest
 
       # Discovers and runs the tests in tests/. source-folder puts the
-      # +matlabdeps package parent on the MATLAB path and scopes code coverage.
+      # +mlock package parent on the MATLAB path and scopes code coverage.
       - name: Run tests
         uses: matlab-actions/run-tests@v2
         with:

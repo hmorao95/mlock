@@ -11,7 +11,7 @@ function tf = isFilesystemRoot(p)
 %   POSIX root          -> "/", ""
 %
 % Syntax:
-%  tf = matlabdeps.internal.isFilesystemRoot(p) Classify path P.
+%  tf = mlock.internal.isFilesystemRoot(p) Classify path P.
 %
 % Input Arguments:
 %  - p (string) - A path.
@@ -19,7 +19,7 @@ function tf = isFilesystemRoot(p)
 % Output Arguments:
 %  - tf (logical) - True when P is a filesystem/drive root.
 
-s = matlabdeps.internal.toPosix(p);          % normalize separators to '/'
+s = mlock.internal.toPosix(p);          % normalize separators to '/'
 s = regexprep(s, '/+$', '');                 % drop trailing slashes ("C:/" -> "C:")
 
 if strlength(s) == 0

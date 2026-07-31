@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- **BREAKING: renamed the project and package `matlabdeps` → `mlock`.** Call
+  sites move from `matlabdeps.lock/verify/check/resolve` to `mlock.*`; error
+  identifiers are now `mlock:*`; the lock schema id is `mlock-lock` and the
+  default lockfile is `mlock.lock.json`. Existing `matlabdeps.lock.json` files
+  should be renamed/regenerated.
+
 ## [0.2.2] - 2026-07-31
 
 ### Changed
@@ -19,18 +29,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `resolve` now refuses to infer a `ProjectRoot` that is only a filesystem/drive
   root (e.g. sibling top-level entry points reducing to `C:`), which would have
   scanned an entire drive and misclassified toolbox files as project files. It
-  raises `matlabdeps:resolve:rootTooShallow` asking for an explicit
-  `ProjectRoot`. ([#2](https://github.com/hmorao95/matlab_lock/issues/2))
+  raises `mlock:resolve:rootTooShallow` asking for an explicit
+  `ProjectRoot`. ([#2](https://github.com/hmorao95/mlock/issues/2))
 
 ## [0.2.0] - 2026-07-31
 
 ### Added
 
-- `NormalizeNewlines` option on `matlabdeps.lock` (default `true`): text files
+- `NormalizeNewlines` option on `mlock.lock` (default `true`): text files
   are hashed with newlines folded to LF, so locks verify across Windows/Unix.
-- `Timestamp` option on `matlabdeps.lock` (default `true`): set `false` for
+- `Timestamp` option on `mlock.lock` (default `true`): set `false` for
   byte-reproducible lockfiles with no diff churn.
-- `RequireSameProductVersions` option on `matlabdeps.check` to fail on product
+- `RequireSameProductVersions` option on `mlock.check` to fail on product
   version mismatches, not just missing products.
 - `hash` policy block in the lockfile (`algorithm`, `normalize_newlines`) so
   `verify` re-hashes exactly as the lock was written.
@@ -62,12 +72,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Initial `+matlabdeps` package: `lock`, `verify`, `check`, `resolve`.
+- Initial `+mlock` package: `lock`, `verify`, `check`, `resolve`.
 - Automatic dependency resolution via
   `matlab.codetools.requiredFilesAndProducts`, with SHA-256 file pinning and a
-  MATLAB release / product-version snapshot written to `matlabdeps.lock.json`.
+  MATLAB release / product-version snapshot written to `mlock.lock.json`.
 - `Extra` glob option to pin data/config files code analysis cannot discover.
-- Unit test suite (`tests/testMatlabdeps.m`).
+- Unit test suite (`tests/testMlock.m`).
 - GitHub Actions CI (`matlab-actions/setup-matlab` + `run-tests`) on Linux and
   Windows.
 - pre-commit hooks: file hygiene, plus MATLAB tests (pre-push) and an advisory

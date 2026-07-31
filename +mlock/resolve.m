@@ -9,10 +9,10 @@ function res = resolve(entryPoints, opts)
 % analysis and then restored, mirroring how the project would actually be run.
 %
 % Syntax:
-%  res = matlabdeps.resolve(entryPoints) Resolve the dependencies of
+%  res = mlock.resolve(entryPoints) Resolve the dependencies of
 %    ENTRYPOINTS and return them as a struct.
 %
-%  res = matlabdeps.resolve(entryPoints, Name, Value) Control resolution with
+%  res = mlock.resolve(entryPoints, Name, Value) Control resolution with
 %    name-value options.
 %
 % Input Arguments:
@@ -41,12 +41,12 @@ function res = resolve(entryPoints, opts)
 % Usage:
 %  Example 1 - Inspect resolved dependencies::
 %
-%    res = matlabdeps.resolve("main.m");
+%    res = mlock.resolve("main.m");
 %    disp(res.files);
 %    disp({res.products.name});
 %
 % See also:
-%   matlabdeps.lock, matlabdeps.verify, matlabdeps.check
+%   mlock.lock, mlock.verify, mlock.check
 
 arguments
     % (1,:) string accepts char, string, string array or cellstr and coerces
@@ -57,10 +57,10 @@ arguments
     opts.Verbose (1,1) logical = true
 end
 
-% Guard: an empty string row (e.g. matlabdeps.resolve(string.empty)) has nothing
+% Guard: an empty string row (e.g. mlock.resolve(string.empty)) has nothing
 % to analyze, so fail loudly rather than returning an empty, misleading result.
 if isempty(entryPoints)
-    error('matlabdeps:resolve:noEntry', 'At least one entry point is required.');
+    error('mlock:resolve:noEntry', 'At least one entry point is required.');
 end
 
 % --- Determine project root (if given) up front, to resolve relative entries ---
@@ -69,9 +69,9 @@ end
 haveRoot = strlength(opts.ProjectRoot) > 0;
 if haveRoot
     % Canonicalize now so every later prefix comparison uses the same form.
-    root = matlabdeps.internal.absPath(opts.ProjectRoot);
+    root = mlock.internal.absPath(opts.ProjectRoot);
     if ~isfolder(root)
-        error('matlabdeps:resolve:badRoot', 'Project root is not a folder: %s', root);
+        error('mlock:resolve:badRoot', 'Project root is not a folder: %s', root);
     end
 end
 
@@ -87,17 +87,17 @@ for i = 1:numel(entryPoints)
     if haveRoot && ~isAbsoluteEntry(ep)
         cand = fullfile(char(root), char(ep));
         if isfile(cand)
-            ap = matlabdeps.internal.absPath(cand);
+            ap = mlock.internal.absPath(cand);
         end
     end
     % Preference 2 / fallback: resolve against the current folder (or take the
     % path as-is if it is already absolute). absPath handles both.
     if strlength(ap) == 0
-        ap = matlabdeps.internal.absPath(ep);
+        ap = mlock.internal.absPath(ep);
     end
     % Fail early with the ORIGINAL spelling so the message is recognizable.
     if ~isfile(ap)
-        error('matlabdeps:resolve:missingEntry', 'Entry point not found: %s', ep);
+        error('mlock:resolve:missingEntry', 'Entry point not found: %s', ep);
     end
     eps(i) = ap;
 end
@@ -107,13 +107,13 @@ end
 % trees off the path, silently dropping them from the resolution. The common
 % ancestor is the smallest folder guaranteed to contain every entry point.
 if ~haveRoot
-    root = matlabdeps.internal.commonAncestor(eps);
+    root = mlock.internal.commonAncestor(eps);
     % Guard: entries placed high in the tree (sibling top-level or project dirs)
     % can share only a drive/filesystem root. genpath'ing that would scan the
     % whole volume and hash toolbox files as project files - refuse and make the
     % caller name the project explicitly.
-    if matlabdeps.internal.isFilesystemRoot(root)
-        error('matlabdeps:resolve:rootTooShallow', ...
+    if mlock.internal.isFilesystemRoot(root)
+        error('mlock:resolve:rootTooShallow', ...
             ['Entry points only share a filesystem root (%s); this would scan an ' ...
              'entire drive. Pass ProjectRoot to name the project folder.'], root);
     end
@@ -127,19 +127,19 @@ end
 outside = strings(0);
 for i = 1:numel(eps)
     % toRel returns "" when eps(i) is not under root -> it is outside.
-    if strlength(matlabdeps.internal.toRel(eps(i), root)) == 0
+    if strlength(mlock.internal.toRel(eps(i), root)) == 0
         outside(end+1) = eps(i); %#ok<AGROW>
     end
 end
 if ~isempty(outside)
-    warning('matlabdeps:resolve:entryOutsideRoot', ...
+    warning('mlock:resolve:entryOutsideRoot', ...
         ['%d entry point(s) lie outside ProjectRoot (%s) and will be treated ' ...
          'as external; their in-project files may be missed:\n  %s'], ...
         numel(outside), root, strjoin(outside, sprintf('\n  ')));
 end
 
 if opts.Verbose
-    fprintf('matlabdeps: resolving %d entry point(s) under %s ...\n', numel(eps), root);
+    fprintf('mlock: resolving %d entry point(s) under %s ...\n', numel(eps), root);
 end
 
 % --- Core dependency analysis (project tree + every entry folder on the path) ---
@@ -166,7 +166,7 @@ flist = string(flist(:)');                          % -> string row for slicing
 files = strings(0);
 external = strings(0);
 for i = 1:numel(flist)
-    rel = matlabdeps.internal.toRel(flist(i), root);
+    rel = mlock.internal.toRel(flist(i), root);
     if strlength(rel) > 0
         files(end+1) = rel; %#ok<AGROW>          % inside project -> relative path
     else
@@ -199,7 +199,7 @@ res.externalFiles = external;   % absolute out-of-project paths
 res.products      = products;   % sorted struct array
 
 if opts.Verbose
-    fprintf('matlabdeps: %d project file(s), %d external file(s), %d product(s).\n', ...
+    fprintf('mlock: %d project file(s), %d external file(s), %d product(s).\n', ...
         numel(files), numel(external), numel(products));
 end
 end

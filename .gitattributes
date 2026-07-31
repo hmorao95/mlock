@@ -1,5 +1,5 @@
 # Normalize line endings so lockfile hashes are stable across platforms.
-# matlabdeps also hashes text files newline-insensitively by default
+# mlock also hashes text files newline-insensitively by default
 # (NormalizeNewlines), but pinning EOL here keeps working trees consistent too.
 * text=auto eol=lf
 

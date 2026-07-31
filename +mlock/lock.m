@@ -9,10 +9,10 @@ function lk = lock(entryPoints, opts)
 % not hand-listed, so the lock stays in sync with the project.
 %
 % Syntax:
-%  lk = matlabdeps.lock(entryPoints) Resolve ENTRYPOINTS, write
-%    ``<root>/matlabdeps.lock.json``, and return the lock struct.
+%  lk = mlock.lock(entryPoints) Resolve ENTRYPOINTS, write
+%    ``<root>/mlock.lock.json``, and return the lock struct.
 %
-%  lk = matlabdeps.lock(entryPoints, Name, Value) Control resolution and output
+%  lk = mlock.lock(entryPoints, Name, Value) Control resolution and output
 %    with name-value options.
 %
 % Input Arguments:
@@ -27,7 +27,7 @@ function lk = lock(entryPoints, opts)
 %      outside (toolboxes, shared libs) are recorded as external. Default:
 %      folder of the first entry point.
 %    - Output (string) -
-%      Lockfile path to write. Default: ``<ProjectRoot>/matlabdeps.lock.json``.
+%      Lockfile path to write. Default: ``<ProjectRoot>/mlock.lock.json``.
 %    - Extra (string) -
 %      Globs relative to ProjectRoot for files code analysis cannot find, such
 %      as data or configs, e.g. ``["data/*.xlsx" "config/params.json"]``.
@@ -56,21 +56,21 @@ function lk = lock(entryPoints, opts)
 % Usage:
 %  Example 1 - Lock a single entry point::
 %
-%    matlabdeps.lock("main.m")
+%    mlock.lock("main.m")
 %
 %  Example 2 - Multiple entry points, custom root, and pinned data files::
 %
-%    matlabdeps.lock(["run_all.m" "make_figures.m"], ...
+%    mlock.lock(["run_all.m" "make_figures.m"], ...
 %        ProjectRoot = "C:\proj", ...
 %        Extra       = ["data/*.xlsx" "config/params.json"], ...
 %        Meta        = struct('seed', 'rng default', 'note', 'baseline'));
 %
 %  Example 3 - Compute the lock without writing it::
 %
-%    lk = matlabdeps.lock("main.m", Write=false);
+%    lk = mlock.lock("main.m", Write=false);
 %
 % See also:
-%   matlabdeps.resolve, matlabdeps.verify, matlabdeps.check
+%   mlock.resolve, mlock.verify, mlock.check
 
 arguments
     entryPoints  (1,:) string
@@ -87,7 +87,7 @@ end
 
 % Step 1: discover dependencies. resolve() does the code analysis and returns
 % project files (relative), external files (absolute), products, and the root.
-res  = matlabdeps.resolve(entryPoints, ProjectRoot=opts.ProjectRoot, Verbose=opts.Verbose);
+res  = mlock.resolve(entryPoints, ProjectRoot=opts.ProjectRoot, Verbose=opts.Verbose);
 root = res.root;
 
 % --- Collect the project-relative files to pin (resolved + extras) ---
@@ -97,12 +97,12 @@ relFiles = res.files;
 if ~isempty(opts.Extra)
     % expandGlobs errors on a pattern that matches nothing (catches typos);
     % unique() merges + sorts so a file named in both places is pinned once.
-    relFiles = unique([relFiles, matlabdeps.internal.expandGlobs(opts.Extra, root)]);
+    relFiles = unique([relFiles, mlock.internal.expandGlobs(opts.Extra, root)]);
 end
 
 % --- Assemble the lock struct (field insertion order == JSON key order) ---
 lk = struct();
-lk.schema         = 'matlabdeps-lock';   % magic string identifying the format
+lk.schema         = 'mlock-lock';   % magic string identifying the format
 lk.schema_version = 2;                   % bump on any breaking schema change
 % The timestamp is the only non-deterministic field; make it opt-out so callers
 % who commit the lock can get byte-identical output when nothing has changed.
@@ -122,7 +122,7 @@ lk.hash = struct('algorithm', 'sha256', ...
                  'normalize_newlines', opts.NormalizeNewlines);
 
 % Store entry points posix-style so the lock reads the same on every OS.
-lk.entry_points = cellstr(matlabdeps.internal.toPosix(res.entryPoints));
+lk.entry_points = cellstr(mlock.internal.toPosix(res.entryPoints));
 
 % Preserve any caller metadata verbatim under "run" (seed, mode, note, ...).
 lk.run = opts.Meta;
@@ -131,7 +131,7 @@ lk.products = res.products;   % already sorted by name in resolve()
 
 % Step 2: hash every pinned project file. hashFiles applies newline
 % normalization per-file (text files only) according to the policy above.
-lk.files = matlabdeps.internal.hashFiles(relFiles, root, opts.NormalizeNewlines);
+lk.files = mlock.internal.hashFiles(relFiles, root, opts.NormalizeNewlines);
 
 % --- External files: ALWAYS an array of objects (consistent schema) ---
 % Prior versions emitted a cellstr when not hashing and a struct array when
@@ -148,12 +148,12 @@ else
 end
 for i = 1:numel(extSorted)
     p = char(extSorted(i));
-    ext(i).path = char(matlabdeps.internal.matlabRelative(p));   % portable form
+    ext(i).path = char(mlock.internal.matlabRelative(p));   % portable form
     if opts.HashExternal
         if isfile(p)
             d = dir(p);
             ext(i).bytes  = d.bytes;
-            ext(i).sha256 = char(matlabdeps.internal.sha256File(p));
+            ext(i).sha256 = char(mlock.internal.sha256File(p));
         else
             % Recorded but absent right now: sentinel values, not a hard error.
             ext(i).bytes  = -1;
@@ -168,11 +168,11 @@ if opts.Write
     outPath = opts.Output;
     if strlength(outPath) == 0
         % Default: drop the lock at the project root next to the code it pins.
-        outPath = fullfile(char(root), 'matlabdeps.lock.json');
+        outPath = fullfile(char(root), 'mlock.lock.json');
     end
-    matlabdeps.internal.writeJson(lk, outPath);
+    mlock.internal.writeJson(lk, outPath);
     if opts.Verbose
-        fprintf('matlabdeps: lockfile written to %s\n', outPath);
+        fprintf('mlock: lockfile written to %s\n', outPath);
     end
 end
 end
