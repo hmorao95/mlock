@@ -1,7 +1,7 @@
 # matlabdeps
 
 Resolve a MATLAB project's dependencies into a **lockfile** — the MATLAB analogue
-of `npm install → package-lock.json` or Cargo's `Cargo.lock`.
+of `npm install → package-lock.json`, `uv lock → uv.lock`, or Cargo's `Cargo.lock`.
 
 Unlike a hand-maintained manifest, `matlabdeps` **discovers** dependencies from
 your code using `matlab.codetools.requiredFilesAndProducts`: it walks the call

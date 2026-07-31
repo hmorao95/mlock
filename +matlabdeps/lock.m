@@ -4,9 +4,9 @@ function lk = lock(entryPoints, opts)
 % Discovers dependencies from your code (via
 % matlab.codetools.requiredFilesAndProducts), pins each project file by
 % SHA-256, records the MATLAB release and product versions, and writes a JSON
-% lockfile. This is the MATLAB analogue of ``npm install`` -> package-lock.json
-% or Cargo -> Cargo.lock: dependencies are discovered, not hand-listed, so the
-% lock stays in sync with the project.
+% lockfile. This is the MATLAB analogue of ``npm install`` -> package-lock.json,
+% ``uv lock`` -> uv.lock, or Cargo -> Cargo.lock: dependencies are discovered,
+% not hand-listed, so the lock stays in sync with the project.
 %
 % Syntax:
 %  lk = matlabdeps.lock(entryPoints) Resolve ENTRYPOINTS, write
