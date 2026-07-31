@@ -192,3 +192,7 @@ uploaded as build artifacts. Licensing is handled automatically for public repos
 - MATLAB has no installer that restores from a lockfile, so `matlabdeps` detects
   and reports drift rather than fixing it automatically.
 ```
+
+## License
+
+Released under the [MIT License](LICENSE) © 2026 Hugo Morão.
