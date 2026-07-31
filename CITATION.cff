@@ -10,7 +10,7 @@ authors:
   - family-names: "Morão"
     given-names: "Hugo"
     alias: hmorao95
-version: 0.2.2
+version: 0.3.0
 license: MIT
 date-released: "2026-07-31"
 url: "https://github.com/hmorao95/mlock"
