@@ -1,0 +1,48 @@
+# Pre-commit configuration for the matlabdeps package.
+#
+# Install once:
+#   pip install pre-commit
+#   pre-commit install --install-hooks          # commit-stage hooks
+#   pre-commit install --hook-type pre-push     # run the test suite before push
+#
+# The MATLAB hooks skip gracefully when MATLAB is not on PATH, so contributors
+# without a local MATLAB can still commit; CI remains the authoritative gate.
+
+minimum_pre_commit_version: "3.0.0"
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  # --- Fast, language-agnostic file hygiene (commit stage) ---
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: '\.lock\.json$'
+      - id: end-of-file-fixer
+        exclude: '\.lock\.json$'
+      - id: check-yaml
+      - id: check-json
+      - id: check-merge-conflict
+      - id: mixed-line-ending
+        args: [--fix=lf]
+
+  # --- MATLAB checks (local; require a local MATLAB) ---
+  - repo: local
+    hooks:
+      # Authoritative gate: run the unit tests before pushing.
+      - id: matlab-tests
+        name: MATLAB tests (runtests)
+        entry: python tools/run_matlab_hook.py --mode test
+        language: python
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
+
+      # Advisory: Code Analyzer report on staged .m files. Never blocks a commit;
+      # run on demand with:  pre-commit run matlab-lint --all-files
+      - id: matlab-lint
+        name: MATLAB Code Analyzer (checkcode, advisory)
+        entry: python tools/run_matlab_hook.py --mode lint
+        language: python
+        files: '\.m$'
+        stages: [manual]

@@ -1,2 +1,25 @@
-# Auto detect text files and perform LF normalization
-* text=auto
+# Normalize line endings so lockfile hashes are stable across platforms.
+# matlabdeps also hashes text files newline-insensitively by default
+# (NormalizeNewlines), but pinning EOL here keeps working trees consistent too.
+* text=auto eol=lf
+
+# MATLAB / text sources -> always LF
+*.m       text eol=lf
+*.md      text eol=lf
+*.json    text eol=lf
+*.yml     text eol=lf
+*.yaml    text eol=lf
+*.txt     text eol=lf
+*.csv     text eol=lf
+*.py      text eol=lf
+
+# Binary assets -> never touched
+*.mat     binary
+*.xlsx    binary
+*.xls     binary
+*.dta     binary
+*.png     binary
+*.jpg     binary
+*.mlx     binary
+*.p       binary
+*.mex*    binary

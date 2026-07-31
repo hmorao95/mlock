@@ -1,0 +1,47 @@
+name: Test matlabdeps
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: MATLAB tests (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      # Installs the latest released MATLAB. Licensing is handled automatically
+      # for public repositories via MathWorks' hosted batch licensing.
+      - name: Set up MATLAB
+        uses: matlab-actions/setup-matlab@v2
+        with:
+          release: latest
+
+      # Discovers and runs the tests in tests/. source-folder puts the
+      # +matlabdeps package parent on the MATLAB path and scopes code coverage.
+      - name: Run tests
+        uses: matlab-actions/run-tests@v2
+        with:
+          source-folder: .
+          select-by-folder: tests
+          test-results-junit: test-results/results.xml
+          code-coverage-cobertura: code-coverage/coverage.xml
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results-${{ matrix.os }}
+          path: |
+            test-results/**
+            code-coverage/**
+          if-no-files-found: ignore

@@ -1,0 +1,9 @@
+# CI artifacts
+test-results/
+code-coverage/
+
+# MATLAB
+*.asv
+*.m~
+slprj/
+octave-workspace
