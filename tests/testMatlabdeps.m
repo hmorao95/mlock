@@ -143,6 +143,27 @@ verifyTrue(tc, ismember("b/b_helper.m", paths), ...
     'Second entry point''s dependency must be pinned, not dropped.');
 end
 
+function testFilesystemRootIsDetected(tc)
+% Roots that must be rejected as too shallow.
+verifyTrue(tc, matlabdeps.internal.isFilesystemRoot("C:"));
+verifyTrue(tc, matlabdeps.internal.isFilesystemRoot("C:/"));
+verifyTrue(tc, matlabdeps.internal.isFilesystemRoot("C:\"));
+verifyTrue(tc, matlabdeps.internal.isFilesystemRoot("/"));
+verifyTrue(tc, matlabdeps.internal.isFilesystemRoot("//server"));
+% Real project folders must NOT be flagged.
+verifyFalse(tc, matlabdeps.internal.isFilesystemRoot("C:/Users/me/proj"));
+verifyFalse(tc, matlabdeps.internal.isFilesystemRoot("/home/me/proj"));
+verifyFalse(tc, matlabdeps.internal.isFilesystemRoot("//server/share/proj"));
+end
+
+function testInferredRootRejectsFilesystemRoot(tc)
+% Sibling top-level entries share only a drive root -> resolve must refuse and
+% ask for an explicit ProjectRoot rather than genpath'ing an entire drive.
+root = matlabdeps.internal.commonAncestor(["C:/projA/main.m", "C:/projB/main.m"]);
+verifyTrue(tc, matlabdeps.internal.isFilesystemRoot(root), ...
+    'Sibling top-level entries should reduce to a drive root.');
+end
+
 function testExternalFilesSchemaIsConsistent(tc)
 % external_files must be the same shape (array of objects) regardless of
 % HashExternal, rather than cellstr in one case and struct in the other.
