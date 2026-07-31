@@ -60,7 +60,7 @@ end
 
 function testExtraGlobsArePinned(tc)
 lk = mlock.lock("main.m", ProjectRoot=tc.TestData.proj, ...
-    Extra=["data/*.csv"], Verbose=false);
+    Extra="data/*.csv", Verbose=false);
 paths = string({lk.files.path});
 verifyTrue(tc, ismember("data/in.csv", paths), ...
     'Data file matched by Extra glob should be pinned.');
@@ -69,12 +69,12 @@ end
 function testExtraNoMatchErrors(tc)
 verifyError(tc, ...
     @() mlock.lock("main.m", ProjectRoot=tc.TestData.proj, ...
-        Extra=["data/*.nope"], Verbose=false), ...
+        Extra="data/*.nope", Verbose=false), ...
     'mlock:extra:noMatch');
 end
 
 function testVerifyCleanPasses(tc)
-mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Extra=["data/*.csv"], Verbose=false);
+mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Extra="data/*.csv", Verbose=false);
 ok = mlock.verify(tc.TestData.lock, Verbose=false);
 verifyTrue(tc, ok);
 end
@@ -89,7 +89,7 @@ verifyTrue(tc, ismember("lib/helper.m", rep.changed));
 end
 
 function testVerifyDetectsMissing(tc)
-mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Extra=["data/*.csv"], Verbose=false);
+mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Extra="data/*.csv", Verbose=false);
 delete(fullfile(tc.TestData.proj, 'data', 'in.csv'));
 [ok, rep] = mlock.verify(tc.TestData.lock, Verbose=false);
 verifyFalse(tc, ok);
