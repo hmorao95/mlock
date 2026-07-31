@@ -12,8 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **BREAKING: renamed the project and package `matlabdeps` → `mlock`.** Call
   sites move from `matlabdeps.lock/verify/check/resolve` to `mlock.*`; error
   identifiers are now `mlock:*`; the lock schema id is `mlock-lock` and the
-  default lockfile is `mlock.lock.json`. Existing `matlabdeps.lock.json` files
-  should be renamed/regenerated.
+  default lockfile is `mlock.lock.json`.
 
 ## [0.2.2] - 2026-07-31
 
