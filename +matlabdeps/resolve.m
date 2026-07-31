@@ -108,6 +108,15 @@ end
 % ancestor is the smallest folder guaranteed to contain every entry point.
 if ~haveRoot
     root = matlabdeps.internal.commonAncestor(eps);
+    % Guard: entries placed high in the tree (sibling top-level or project dirs)
+    % can share only a drive/filesystem root. genpath'ing that would scan the
+    % whole volume and hash toolbox files as project files - refuse and make the
+    % caller name the project explicitly.
+    if matlabdeps.internal.isFilesystemRoot(root)
+        error('matlabdeps:resolve:rootTooShallow', ...
+            ['Entry points only share a filesystem root (%s); this would scan an ' ...
+             'entire drive. Pass ProjectRoot to name the project folder.'], root);
+    end
 end
 
 % --- Warn about entries that fall outside an explicitly given root ---

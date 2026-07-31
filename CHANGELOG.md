@@ -5,13 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.2.1] - 2026-07-31
 
-### Known issues
+### Fixed
 
-- Inferring `ProjectRoot` from multiple entry points placed high in the tree can
-  yield a too-shallow common ancestor (e.g. a drive root). Pass `ProjectRoot`
-  explicitly for such layouts until a shallow-root guard lands.
+- `resolve` now refuses to infer a `ProjectRoot` that is only a filesystem/drive
+  root (e.g. sibling top-level entry points reducing to `C:`), which would have
+  scanned an entire drive and misclassified toolbox files as project files. It
+  raises `matlabdeps:resolve:rootTooShallow` asking for an explicit
+  `ProjectRoot`. ([#2](https://github.com/hmorao95/matlab_lock/issues/2))
 
 ## [0.2.0] - 2026-07-31
 
