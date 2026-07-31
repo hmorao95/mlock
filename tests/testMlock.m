@@ -257,6 +257,23 @@ verifyTrue(tc, ismember("lib/helper.m", report.removedFiles), ...
     'A dependency no longer used must be reported as removed.');
 end
 
+function testLockRecordsGenerator(tc)
+lk = mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Write=false, Verbose=false);
+verifyEqual(tc, lk.generator.name, 'mlock');
+verifyEqual(tc, string(lk.generator.version), string(mlock.version()), ...
+    'Lock must record the producing mlock version.');
+end
+
+function testVersionMatchesCitation(tc)
+% mlock.version() is the code source of truth; it must match CITATION.cff so the
+% two never drift across releases.
+cff = fileread(fullfile(tc.TestData.pkgRoot, 'CITATION.cff'));
+tok = regexp(cff, '^version:\s*(\S+)', 'tokens', 'once', 'lineanchors');
+verifyNotEmpty(tc, tok, 'CITATION.cff must declare a version.');
+verifyEqual(tc, string(mlock.version()), string(tok{1}), ...
+    'mlock.version() must match CITATION.cff.');
+end
+
 % ======================================================================
 function writeText(fname, lines)
 lines = cellstr(lines);

@@ -104,6 +104,8 @@ end
 lk = struct();
 lk.schema         = 'mlock-lock';   % magic string identifying the format
 lk.schema_version = 3;                   % bump on any breaking schema change
+% Provenance: which tool version produced this lock (distinct from lk.matlab).
+lk.generator = struct('name', 'mlock', 'version', mlock.version());
 % The timestamp is the only non-deterministic field; make it opt-out so callers
 % who commit the lock can get byte-identical output when nothing has changed.
 if opts.Timestamp

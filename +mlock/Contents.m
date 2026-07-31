@@ -6,6 +6,7 @@
 %   status  - Re-resolve and report dependency-SET drift (added/removed deps).
 %   check   - Verify the MATLAB release and locked products are available here.
 %   resolve - Low-level: discover required files and products from entry points.
+%   version - Return the mlock package version (recorded in each lock).
 %
 % Typical use:
 %   mlock.lock("main.m")                 % create mlock.lock.json
