@@ -22,15 +22,24 @@ jobs:
         with:
           release: latest
 
-      # Discovers and runs the tests in tests/. source-folder puts the
-      # +mlock package parent on the MATLAB path and scopes code coverage.
+      # Runs the tests in tests/. source-folder scopes code coverage to the
+      # package itself (not the tests or examples); the test's setupOnce puts
+      # the package parent on the MATLAB path so mlock.* resolves.
       - name: Run tests
         uses: matlab-actions/run-tests@v2
         with:
-          source-folder: .
+          source-folder: +mlock
           select-by-folder: tests
           test-results-junit: test-results/results.xml
           code-coverage-cobertura: code-coverage/coverage.xml
+
+      - name: Upload coverage to Codecov
+        if: always()
+        uses: codecov/codecov-action@v5
+        with:
+          files: code-coverage/coverage.xml
+          fail_ci_if_error: false          # don't fail the build on upload hiccups
+          token: ${{ secrets.CODECOV_TOKEN }}   # optional; recommended for reliability
 
       - name: Upload test results
         if: always()
