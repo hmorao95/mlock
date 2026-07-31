@@ -49,7 +49,7 @@ function testLockWritesFileAndHashes(tc)
 lk = mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Verbose=false);
 verifyTrue(tc, isfile(tc.TestData.lock));
 verifyEqual(tc, lk.schema, 'mlock-lock');
-verifyEqual(tc, lk.schema_version, 2);
+verifyEqual(tc, lk.schema_version, 3);
 paths = string({lk.files.path});
 verifyTrue(tc, ismember("main.m", paths));
 % Every present file must carry a 64-hex-char sha256.
@@ -215,6 +215,46 @@ verifyTrue(tc, mlock.check(tc.TestData.lock, Verbose=false), ...
     'Default check only needs product presence.');
 verifyFalse(tc, mlock.check(tc.TestData.lock, RequireSameProductVersions=true, Verbose=false), ...
     'Version mismatch must fail when enforced.');
+end
+
+function testEntryPointsStoredRelativeAndExtraRecorded(tc)
+lk = mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Extra="data/*.csv", ...
+    Write=false, Verbose=false);
+verifyEqual(tc, lk.schema_version, 3);
+verifyEqual(tc, string(lk.entry_points), "main.m", ...
+    'Entry points must be stored relative to the project root, not absolute.');
+verifyFalse(tc, contains(string(lk.entry_points), ":"), 'No drive-letter/absolute leak.');
+verifyEqual(tc, string(lk.extra), "data/*.csv", 'Extra patterns must be recorded in the lock.');
+end
+
+function testStatusInSyncOnFreshLock(tc)
+mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Extra="data/*.csv", Verbose=false);
+[~, inSync] = mlock.status(tc.TestData.lock, Verbose=false);
+verifyTrue(tc, inSync, 'A freshly written lock must be in sync with its project.');
+end
+
+function testStatusDetectsAddedDependency(tc)
+mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Verbose=false);
+% Introduce a brand-new dependency called from main.
+writeText(fullfile(tc.TestData.proj, 'lib', 'extra_dep.m'), ...
+    ["function y = extra_dep()"; "  y = 7;"; "end"]);
+writeText(fullfile(tc.TestData.proj, 'main.m'), ...
+    ["function main()"; "  y = helper(4) + extra_dep();"; "  disp(y);"; "end"]);
+[report, inSync] = mlock.status(tc.TestData.lock, Verbose=false);
+verifyFalse(tc, inSync);
+verifyTrue(tc, ismember("lib/extra_dep.m", report.addedFiles), ...
+    'A newly introduced dependency must be reported as added.');
+end
+
+function testStatusDetectsRemovedDependency(tc)
+mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Verbose=false);
+% Rewrite main so it no longer calls the helper chain.
+writeText(fullfile(tc.TestData.proj, 'main.m'), ...
+    ["function main()"; "  disp(mean([1 2 3]));"; "end"]);
+[report, inSync] = mlock.status(tc.TestData.lock, Verbose=false);
+verifyFalse(tc, inSync);
+verifyTrue(tc, ismember("lib/helper.m", report.removedFiles), ...
+    'A dependency no longer used must be reported as removed.');
 end
 
 % ======================================================================

@@ -9,10 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `mlock.status` — re-resolves the project from the lock and reports
+  dependency-**set** drift (added/removed files and products, product version
+  changes), complementing `mlock.verify` (content drift).
 - `CONTRIBUTING.md`, a pull-request template, and issue forms (bug / feature).
 - `examples/sample_project/` — a runnable project demonstrating lock/verify/check.
 - Code coverage: CI uploads a Cobertura report to Codecov (scoped to the
   `+mlock` package), plus a `codecov.yml` and a coverage badge in the README.
+
+### Changed
+
+- **Lockfile schema_version 3.** `entry_points` are now stored **relative to the
+  project root** (previously absolute — this removes a machine-specific path /
+  username leak and lets `mlock.status` re-resolve on any checkout), and the
+  `Extra` glob patterns are recorded under a new `extra` field.
 
 ## [0.3.0] - 2026-07-31
 

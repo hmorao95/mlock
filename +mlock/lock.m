@@ -103,7 +103,7 @@ end
 % --- Assemble the lock struct (field insertion order == JSON key order) ---
 lk = struct();
 lk.schema         = 'mlock-lock';   % magic string identifying the format
-lk.schema_version = 2;                   % bump on any breaking schema change
+lk.schema_version = 3;                   % bump on any breaking schema change
 % The timestamp is the only non-deterministic field; make it opt-out so callers
 % who commit the lock can get byte-identical output when nothing has changed.
 if opts.Timestamp
@@ -121,8 +121,22 @@ lk.matlab = struct( ...
 lk.hash = struct('algorithm', 'sha256', ...
                  'normalize_newlines', opts.NormalizeNewlines);
 
-% Store entry points posix-style so the lock reads the same on every OS.
-lk.entry_points = cellstr(mlock.internal.toPosix(res.entryPoints));
+% Store entry points RELATIVE to the project root (posix), so the lock reads
+% the same on every machine and leaks no absolute/user-specific path. Storing
+% them relative also lets mlock.status re-resolve the project on any checkout.
+epRel = strings(1, numel(res.entryPoints));
+for i = 1:numel(res.entryPoints)
+    r = mlock.internal.toRel(res.entryPoints(i), root);
+    if strlength(r) == 0
+        r = mlock.internal.toPosix(res.entryPoints(i));   % fallback: entry outside root
+    end
+    epRel(i) = r;
+end
+lk.entry_points = cellstr(epRel);
+
+% Record the Extra glob patterns (relative to root) so mlock.status can
+% re-expand the same data/config files that code analysis cannot discover.
+lk.extra = cellstr(opts.Extra);
 
 % Preserve any caller metadata verbatim under "run" (seed, mode, note, ...).
 lk.run = opts.Meta;

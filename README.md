@@ -94,7 +94,7 @@ When multiple entry points live in different folders, `ProjectRoot` defaults to
 their **common ancestor** and every entry folder is put on the path during
 resolution, so no entry's dependency tree is silently dropped.
 
-### 2. Verify (has the project drifted?)
+### 2. Verify (has the *content* drifted?)
 
 Re-hashes every pinned file and compares to the lock. Returns `true` only if all match.
 
@@ -103,7 +103,18 @@ ok = mlock.verify("mlock.lock.json");
 [ok, report] = mlock.verify("mlock.lock.json");   % report.changed / .missing
 ```
 
-### 3. Check (can this machine run it?)
+### 3. Status (has the *dependency set* changed?)
+
+Re-resolves the project from the lock's entry points and reports **added/removed**
+files and products (and product version changes) — e.g. a new dependency you
+introduced that isn't pinned yet. Complements `verify` (content) with set drift.
+
+```matlab
+[report, inSync] = mlock.status("mlock.lock.json");
+% report.addedFiles / .removedFiles / .addedProducts / .removedProducts / .changedProducts
+```
+
+### 4. Check (can this machine run it?)
 
 Confirms the MATLAB release and locked products are available here.
 
@@ -119,16 +130,17 @@ ok = mlock.check("mlock.lock.json", RequireSameProductVersions=true);
 res = mlock.resolve("main.m");   % .files .externalFiles .products .root
 ```
 
-## Lockfile format (`schema_version: 2`)
+## Lockfile format (`schema_version: 3`)
 
 ```jsonc
 {
   "schema": "mlock-lock",
-  "schema_version": 2,
+  "schema_version": 3,
   "generated": "2026-07-31 12:00:00",           // omitted when Timestamp=false
   "matlab": { "version": "...", "release": "2026b", "arch": "win64" },
   "hash": { "algorithm": "sha256", "normalize_newlines": true },
-  "entry_points": ["main.m"],
+  "entry_points": ["main.m"],                    // relative to the project root
+  "extra": ["data/*.csv"],                       // Extra globs, for mlock.status
   "run": { "seed": "rng default", "note": "baseline" },
   "products": [ { "name": "MATLAB", "version": "26.2", "product_number": 1, "certain": true } ],
   "files": [ { "path": "main.m", "bytes": 104, "sha256": "43c7..." } ],
@@ -143,7 +155,8 @@ res = mlock.resolve("main.m");   % .files .externalFiles .products .root
 mlock/
 ├── +mlock/
 │   ├── lock.m         % resolve + hash + write lockfile
-│   ├── verify.m       % re-hash pinned files, detect drift
+│   ├── verify.m       % re-hash pinned files, detect content drift
+│   ├── status.m       % re-resolve, detect dependency-set drift
 │   ├── check.m        % verify release + products on this machine
 │   ├── resolve.m      % low-level dependency discovery
 │   └── +internal/     % helpers (absPath, sha256File, hashFiles, ...)
