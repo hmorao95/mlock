@@ -10,6 +10,36 @@ require, pins each project file by SHA-256, and records the MATLAB release and
 product versions. Later you can *verify* the project hasn't drifted and *check*
 that another machine can satisfy the lock.
 
+## About
+
+MATLAB has no built-in lockfile: there's no `Project.toml`/`Manifest.toml`, and
+nothing records *exactly* which files and toolboxes a piece of analysis needs.
+That makes replication packages fragile — a missing toolbox, an edited helper,
+or a different MATLAB release can silently change results. `matlabdeps` closes
+that gap by turning an entry point into a committed, verifiable manifest.
+
+**Who it's for**
+
+- Researchers shipping replication packages who need "run this and get the same
+  numbers" to actually hold.
+- Teams pinning a shared analysis so a teammate's environment either matches or
+  fails loudly, not quietly.
+- Anyone who wants CI to fail when a tracked source file or required toolbox
+  changes out from under them.
+
+**What it gives you**
+
+- **Automatic resolution** — dependencies are discovered from the code, not
+  hand-listed, so the lock can't drift out of sync with the project.
+- **Integrity pinning** — every project file is fixed by SHA-256; text files are
+  hashed newline-insensitively so a lock verifies across Windows and Unix.
+- **Environment capture** — MATLAB release and product versions are recorded and
+  checkable on any machine.
+- **Portable, reproducible lockfiles** — toolbox paths stored as `$MATLABROOT/…`,
+  optional timestamp-free output, sorted entries for clean diffs.
+- **Zero heavy dependencies** — pure MATLAB (no Java required); one namespaced
+  `+matlabdeps` package you drop on the path.
+
 ## Requirements
 
 - MATLAB R2021a or newer (uses `arguments` blocks and `jsonencode(...,'PrettyPrint',true)`).
