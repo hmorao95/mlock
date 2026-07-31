@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `CONTRIBUTING.md`, a pull-request template, and issue forms (bug / feature).
+- `examples/sample_project/` — a runnable project demonstrating lock/verify/check.
+- Code coverage: CI uploads a Cobertura report to Codecov (scoped to the
+  `+mlock` package), plus a `codecov.yml` and a coverage badge in the README.
+
 ## [0.3.0] - 2026-07-31
 
 ### Changed

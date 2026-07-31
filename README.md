@@ -1,6 +1,7 @@
 # mlock
 
 [![Test mlock](https://github.com/hmorao95/mlock/actions/workflows/test.yml/badge.svg)](https://github.com/hmorao95/mlock/actions/workflows/test.yml)
+[![codecov](https://codecov.io/gh/hmorao95/mlock/branch/main/graph/badge.svg)](https://codecov.io/gh/hmorao95/mlock)
 [![Release](https://img.shields.io/github/v/release/hmorao95/mlock)](https://github.com/hmorao95/mlock/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![MATLAB R2021a+](https://img.shields.io/badge/MATLAB-R2021a%2B-orange)

@@ -1,0 +1,15 @@
+# Codecov configuration for mlock.
+# Coverage is measured on the +mlock package only (see the CI source-folder).
+coverage:
+  status:
+    project:
+      default:
+        target: 80%          # aim to keep package coverage at/above this
+        threshold: 5%        # allow small dips without a red status
+        informational: true  # report only - never blocks the build
+    patch:
+      default:
+        informational: true
+
+# Keep PR noise low; the badge and status carry the signal.
+comment: false
