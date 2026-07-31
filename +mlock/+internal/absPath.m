@@ -6,7 +6,7 @@ function ap = absPath(p)
 % collapsed manually so the result is still a clean absolute path.
 %
 % Syntax:
-%  ap = matlabdeps.internal.absPath(p) Return the canonical absolute form of P.
+%  ap = mlock.internal.absPath(p) Return the canonical absolute form of P.
 %
 % Input Arguments:
 %  - p (string) - A path, absolute or relative to the current folder.

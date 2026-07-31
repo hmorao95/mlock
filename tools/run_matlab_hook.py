@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""pre-commit helper: run matlabdeps checks through a locally installed MATLAB.
+"""pre-commit helper: run mlock checks through a locally installed MATLAB.
 
 Modes:
   --mode test   Run the unit tests (runtests('tests')); fails on any failure.
@@ -35,7 +35,7 @@ def mode_test(repo_root, _files):
         " disp(results);"
         " failed = nnz([results.Failed]);"
         " if isempty(results) || failed > 0;"
-        "   error('matlabdeps:precommit', '%d test(s) failed', failed);"
+        "   error('mlock:precommit', '%d test(s) failed', failed);"
         " end"
     )
     return run_matlab(repo_root, code)

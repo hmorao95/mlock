@@ -1,4 +1,4 @@
-# Pre-commit configuration for the matlabdeps package.
+# Pre-commit configuration for the mlock package.
 #
 # Install once:
 #   pip install pre-commit

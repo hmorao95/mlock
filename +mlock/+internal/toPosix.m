@@ -2,7 +2,7 @@ function s = toPosix(p)
 % toPosix - Convert a path to forward-slash form (string).
 %
 % Syntax:
-%  s = matlabdeps.internal.toPosix(p) Replace backslashes with '/'.
+%  s = mlock.internal.toPosix(p) Replace backslashes with '/'.
 %
 % Input Arguments:
 %  - p (string) - A path using either separator.

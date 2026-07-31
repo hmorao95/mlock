@@ -4,7 +4,7 @@ function writeJson(s, outPath)
 % Creates the destination folder if it does not exist.
 %
 % Syntax:
-%  matlabdeps.internal.writeJson(s, outPath) Encode S and write it to OUTPATH.
+%  mlock.internal.writeJson(s, outPath) Encode S and write it to OUTPATH.
 %
 % Input Arguments:
 %  - s (struct) - The value to encode as JSON.
@@ -19,7 +19,7 @@ end
 txt = jsonencode(s, 'PrettyPrint', true);
 fid = fopen(outPath, 'w');
 if fid < 0
-    error('matlabdeps:writeJson:open', 'Cannot write file: %s', outPath);
+    error('mlock:writeJson:open', 'Cannot write file: %s', outPath);
 end
 cleanup = onCleanup(@() fclose(fid)); %#ok<NASGU>   % close even if fwrite errors
 % Write as raw chars (not fprintf) so no format-specifier or newline surprises.

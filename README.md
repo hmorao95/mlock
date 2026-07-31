@@ -1,9 +1,9 @@
-# matlabdeps
+# mlock
 
 Resolve a MATLAB project's dependencies into a **lockfile** — the MATLAB analogue
 of `npm install → package-lock.json`, `uv lock → uv.lock`, or Cargo's `Cargo.lock`.
 
-Unlike a hand-maintained manifest, `matlabdeps` **discovers** dependencies from
+Unlike a hand-maintained manifest, `mlock` **discovers** dependencies from
 your code using `matlab.codetools.requiredFilesAndProducts`: it walks the call
 graph from your entry points, finds every project file and MathWorks product they
 require, pins each project file by SHA-256, and records the MATLAB release and
@@ -15,7 +15,7 @@ that another machine can satisfy the lock.
 MATLAB has no built-in lockfile: there's no `Project.toml`/`Manifest.toml`, and
 nothing records *exactly* which files and toolboxes a piece of analysis needs.
 That makes replication packages fragile — a missing toolbox, an edited helper,
-or a different MATLAB release can silently change results. `matlabdeps` closes
+or a different MATLAB release can silently change results. `mlock` closes
 that gap by turning an entry point into a committed, verifiable manifest.
 
 **Who it's for**
@@ -38,7 +38,7 @@ that gap by turning an entry point into a committed, verifiable manifest.
 - **Portable, reproducible lockfiles** — toolbox paths stored as `$MATLABROOT/…`,
   optional timestamp-free output, sorted entries for clean diffs.
 - **Zero heavy dependencies** — pure MATLAB (no Java required); one namespaced
-  `+matlabdeps` package you drop on the path.
+  `+mlock` package you drop on the path.
 
 ## Requirements
 
@@ -47,10 +47,10 @@ that gap by turning an entry point into a committed, verifiable manifest.
 
 ## Install
 
-Put the folder that **contains** `+matlabdeps` on your path:
+Put the folder that **contains** `+mlock` on your path:
 
 ```matlab
-addpath('C:\path\to\matlab_lock');   % the parent of +matlabdeps
+addpath('C:\path\to\mlock');   % the parent of +mlock
 ```
 
 ## Usage
@@ -58,17 +58,17 @@ addpath('C:\path\to\matlab_lock');   % the parent of +matlabdeps
 ### 1. Lock
 
 ```matlab
-% Discover deps from one or more entry points and write matlabdeps.lock.json
-matlabdeps.lock("main.m")
+% Discover deps from one or more entry points and write mlock.lock.json
+mlock.lock("main.m")
 
 % Multiple entry points, custom root, and pin data files code analysis can't see
-matlabdeps.lock(["run_all.m" "make_figures.m"], ...
+mlock.lock(["run_all.m" "make_figures.m"], ...
     ProjectRoot = "C:\proj", ...
     Extra       = ["data/*.xlsx" "config/params.json"], ...
     Meta        = struct('seed','rng default','note','baseline'));
 
 % Compute without writing, to inspect first
-lk = matlabdeps.lock("main.m", Write=false);
+lk = mlock.lock("main.m", Write=false);
 ```
 
 Key options (name-value):
@@ -76,7 +76,7 @@ Key options (name-value):
 | Option | Meaning | Default |
 |---|---|---|
 | `ProjectRoot` | Folder defining the project; files under it are pinned by hash | common ancestor of all entry points |
-| `Output` | Lockfile path to write | `<root>/matlabdeps.lock.json` |
+| `Output` | Lockfile path to write | `<root>/mlock.lock.json` |
 | `Extra` | Globs (relative to root) for files the code analyzer can't find | none |
 | `HashExternal` | Also hash out-of-project files (toolboxes) | `false` |
 | `NormalizeNewlines` | Hash text files newline-insensitively (LF) so locks verify across Windows/Unix | `true` |
@@ -93,8 +93,8 @@ resolution, so no entry's dependency tree is silently dropped.
 Re-hashes every pinned file and compares to the lock. Returns `true` only if all match.
 
 ```matlab
-ok = matlabdeps.verify("matlabdeps.lock.json");
-[ok, report] = matlabdeps.verify("matlabdeps.lock.json");   % report.changed / .missing
+ok = mlock.verify("mlock.lock.json");
+[ok, report] = mlock.verify("mlock.lock.json");   % report.changed / .missing
 ```
 
 ### 3. Check (can this machine run it?)
@@ -102,22 +102,22 @@ ok = matlabdeps.verify("matlabdeps.lock.json");
 Confirms the MATLAB release and locked products are available here.
 
 ```matlab
-ok = matlabdeps.check("matlabdeps.lock.json");
-ok = matlabdeps.check("matlabdeps.lock.json", RequireSameRelease=true);
-ok = matlabdeps.check("matlabdeps.lock.json", RequireSameProductVersions=true);
+ok = mlock.check("mlock.lock.json");
+ok = mlock.check("mlock.lock.json", RequireSameRelease=true);
+ok = mlock.check("mlock.lock.json", RequireSameProductVersions=true);
 ```
 
 ### Low-level: resolve only
 
 ```matlab
-res = matlabdeps.resolve("main.m");   % .files .externalFiles .products .root
+res = mlock.resolve("main.m");   % .files .externalFiles .products .root
 ```
 
 ## Lockfile format (`schema_version: 2`)
 
 ```jsonc
 {
-  "schema": "matlabdeps-lock",
+  "schema": "mlock-lock",
   "schema_version": 2,
   "generated": "2026-07-31 12:00:00",           // omitted when Timestamp=false
   "matlab": { "version": "...", "release": "2026b", "arch": "win64" },
@@ -134,15 +134,15 @@ res = matlabdeps.resolve("main.m");   % .files .externalFiles .products .root
 ## Layout
 
 ```
-matlab_lock/
-├── +matlabdeps/
+mlock/
+├── +mlock/
 │   ├── lock.m         % resolve + hash + write lockfile
 │   ├── verify.m       % re-hash pinned files, detect drift
 │   ├── check.m        % verify release + products on this machine
 │   ├── resolve.m      % low-level dependency discovery
 │   └── +internal/     % helpers (absPath, sha256File, hashFiles, ...)
 ├── tests/
-│   └── testMatlabdeps.m
+│   └── testMlock.m
 └── README.md
 ```
 
@@ -189,7 +189,7 @@ uploaded as build artifacts. Licensing is handled automatically for public repos
   with `Extra`.
 - `verify` checks **file integrity** (hashes); `check` checks **the environment**
   (release + products). Run both for a full reproducibility gate.
-- MATLAB has no installer that restores from a lockfile, so `matlabdeps` detects
+- MATLAB has no installer that restores from a lockfile, so `mlock` detects
   and reports drift rather than fixing it automatically.
 ```
 

@@ -6,7 +6,7 @@ function out = normalizeNewlines(bytes)
 % survives git's autocrlf / .gitattributes normalization.
 %
 % Syntax:
-%  out = matlabdeps.internal.normalizeNewlines(bytes) Normalize BYTES.
+%  out = mlock.internal.normalizeNewlines(bytes) Normalize BYTES.
 %
 % Input Arguments:
 %  - bytes (uint8) - Raw file contents.

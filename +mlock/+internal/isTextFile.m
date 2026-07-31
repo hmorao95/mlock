@@ -6,7 +6,7 @@ function tf = isTextFile(p)
 % their bytes are hashed exactly.
 %
 % Syntax:
-%  tf = matlabdeps.internal.isTextFile(p) Classify the file at path P.
+%  tf = mlock.internal.isTextFile(p) Classify the file at path P.
 %
 % Input Arguments:
 %  - p (string) - A file path or name.

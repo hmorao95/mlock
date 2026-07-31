@@ -7,15 +7,15 @@ function [ok, report] = verify(lockPath, opts)
 % integrity). Returns true only if every pinned file matches.
 %
 % Syntax:
-%  ok = matlabdeps.verify(lockPath) Verify the project against the lockfile at
+%  ok = mlock.verify(lockPath) Verify the project against the lockfile at
 %    LOCKPATH.
 %
-%  [ok, report] = matlabdeps.verify(lockPath, Name, Value) Also return a detail
+%  [ok, report] = mlock.verify(lockPath, Name, Value) Also return a detail
 %    struct and control behavior with name-value options.
 %
 % Input Arguments:
 %  - lockPath (string) -
-%    Path to the lockfile written by matlabdeps.lock.
+%    Path to the lockfile written by mlock.lock.
 %
 %  - Name-Value Arguments -
 %    - ProjectRoot (string) -
@@ -33,15 +33,15 @@ function [ok, report] = verify(lockPath, opts)
 % Usage:
 %  Example 1 - Gate a run on integrity::
 %
-%    assert(matlabdeps.verify("matlabdeps.lock.json"), "project has drifted");
+%    assert(mlock.verify("mlock.lock.json"), "project has drifted");
 %
 %  Example 2 - Inspect what changed::
 %
-%    [ok, report] = matlabdeps.verify("matlabdeps.lock.json");
+%    [ok, report] = mlock.verify("mlock.lock.json");
 %    disp(report.changed);
 %
 % See also:
-%   matlabdeps.lock, matlabdeps.check
+%   mlock.lock, mlock.check
 
 arguments
     lockPath (1,1) string
@@ -50,9 +50,9 @@ arguments
 end
 
 % Canonicalize the lock path so error messages and the default root are stable.
-lockPath = matlabdeps.internal.absPath(lockPath);
+lockPath = mlock.internal.absPath(lockPath);
 if ~isfile(lockPath)
-    error('matlabdeps:verify:noLock', 'Lock file not found: %s', lockPath);
+    error('mlock:verify:noLock', 'Lock file not found: %s', lockPath);
 end
 % jsondecode turns the JSON back into a struct; array-of-objects fields become
 % struct arrays (or a single struct for a 1-element array) - see asObjectList.
@@ -62,7 +62,7 @@ lk = jsondecode(fileread(lockPath));
 % sits at the project root (see lock.m), so the lock's own folder is correct;
 % ProjectRoot lets the caller override when the lock has been relocated.
 if strlength(opts.ProjectRoot) > 0
-    root = matlabdeps.internal.absPath(opts.ProjectRoot);
+    root = mlock.internal.absPath(opts.ProjectRoot);
 else
     root = string(fileparts(lockPath));
 end
@@ -82,7 +82,7 @@ files = asObjectList(lk.files);
 % CHANGED/MISSING paths are collected for both the printout and the report struct.
 nOk = 0; changed = strings(0); missing = strings(0);
 if opts.Verbose
-    fprintf('\n===== matlabdeps.verify =====\nLock: %s\nRoot: %s\n', lockPath, root);
+    fprintf('\n===== mlock.verify =====\nLock: %s\nRoot: %s\n', lockPath, root);
     fprintf('MATLAB release  locked=%s  current=%s\n', lk.matlab.release, version('-release'));
 end
 
@@ -97,8 +97,8 @@ for i = 1:numel(files)
         continue;
     end
     % Normalize newlines only for text files, and only if the lock did so too.
-    normThis = normalize && matlabdeps.internal.isTextFile(f.path);
-    cur = matlabdeps.internal.sha256File(abs, normThis);
+    normThis = normalize && mlock.internal.isTextFile(f.path);
+    cur = mlock.internal.sha256File(abs, normThis);
     if strcmp(cur, string(f.sha256))
         nOk = nOk + 1;
     else
@@ -122,14 +122,14 @@ if isfield(lk, 'external_files')
         end
         nExt = nExt + 1;
         % "$MATLABROOT/..." -> absolute path on THIS machine's MATLAB install.
-        abs = matlabdeps.internal.expandMatlabRoot(e.path);
+        abs = mlock.internal.expandMatlabRoot(e.path);
         if ~isfile(abs)
             % Prefix keeps external entries distinguishable in the report lists.
             missing(end+1) = "[external] " + string(e.path); %#ok<AGROW>
             if opts.Verbose; fprintf('  [MISSING] (external) %s\n', e.path); end
             continue;
         end
-        cur = matlabdeps.internal.sha256File(abs);
+        cur = mlock.internal.sha256File(abs);
         if strcmp(cur, string(e.sha256))
             nOk = nOk + 1;
         else

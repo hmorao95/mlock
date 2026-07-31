@@ -8,9 +8,9 @@ function h = sha256File(fname, normalize)
 % CRLF/LF differences.
 %
 % Syntax:
-%  h = matlabdeps.internal.sha256File(fname) Hash the file bytes exactly.
+%  h = mlock.internal.sha256File(fname) Hash the file bytes exactly.
 %
-%  h = matlabdeps.internal.sha256File(fname, normalize) Optionally normalize
+%  h = mlock.internal.sha256File(fname, normalize) Optionally normalize
 %    newlines (LF) before hashing.
 %
 % Input Arguments:
@@ -24,13 +24,13 @@ if nargin < 2 || isempty(normalize)
 end
 fname = char(fname);
 if ~isfile(fname)
-    error('matlabdeps:sha256:missing', 'File not found: %s', fname);
+    error('mlock:sha256:missing', 'File not found: %s', fname);
 end
 
 if normalize
     % Read the whole file, fold CRLF/CR to LF, then hash the transformed bytes.
     % (Cannot use the whole-file digest here - the bytes must be rewritten first.)
-    bytes = matlabdeps.internal.normalizeNewlines(readAllBytes(fname));
+    bytes = mlock.internal.normalizeNewlines(readAllBytes(fname));
     h = sha256Bytes(bytes);
     return;
 end
@@ -80,7 +80,7 @@ function b = readAllBytes(fname)
 % newline translation happens - the hash must see the file exactly as stored.
 fid = fopen(fname, 'r');
 if fid < 0
-    error('matlabdeps:sha256:open', 'Cannot open file: %s', fname);
+    error('mlock:sha256:open', 'Cannot open file: %s', fname);
 end
 cleanup = onCleanup(@() fclose(fid)); %#ok<NASGU>   % always close, even on error
 b = fread(fid, Inf, '*uint8');                       % '*uint8' -> uint8 column

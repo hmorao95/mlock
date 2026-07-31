@@ -4,7 +4,7 @@ function rel = toRel(absFile, root)
 % Comparison is case-insensitive on Windows and case-sensitive elsewhere.
 %
 % Syntax:
-%  rel = matlabdeps.internal.toRel(absFile, root) Return ABSFILE relative to
+%  rel = mlock.internal.toRel(absFile, root) Return ABSFILE relative to
 %    ROOT, or "" if ABSFILE is not located under ROOT.
 %
 % Input Arguments:
@@ -14,8 +14,8 @@ function rel = toRel(absFile, root)
 % Output Arguments:
 %  - rel (string) - The project-relative posix path, or "" if not under ROOT.
 % Compare in posix form so '\' vs '/' never causes a false mismatch.
-a = matlabdeps.internal.toPosix(absFile);
-r = matlabdeps.internal.toPosix(root);
+a = mlock.internal.toPosix(absFile);
+r = mlock.internal.toPosix(root);
 % Force a trailing '/' on the root so "C:/proj" does not spuriously match a
 % sibling like "C:/project" (prefix test would otherwise pass).
 if ~endsWith(r, "/")
