@@ -1,5 +1,10 @@
 # mlock
 
+[![Test mlock](https://github.com/hmorao95/mlock/actions/workflows/test.yml/badge.svg)](https://github.com/hmorao95/mlock/actions/workflows/test.yml)
+[![Release](https://img.shields.io/github/v/release/hmorao95/mlock)](https://github.com/hmorao95/mlock/releases)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+![MATLAB R2021a+](https://img.shields.io/badge/MATLAB-R2021a%2B-orange)
+
 Resolve a MATLAB project's dependencies into a **lockfile** — the MATLAB analogue
 of `npm install → package-lock.json`, `uv lock → uv.lock`, or Cargo's `Cargo.lock`.
 
