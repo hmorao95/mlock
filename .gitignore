@@ -10,3 +10,7 @@ octave-workspace
 
 # Example-generated lockfiles (machine-specific)
 examples/**/mlock.lock.json
+
+# Built toolbox packages
+*.mltbx
+dist/
