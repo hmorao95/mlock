@@ -13,6 +13,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Lockfiles now record a `generator` block (`{name: "mlock", version: …}`) so a
   lock states which tool version produced it. The test suite cross-checks
   `mlock.version()` against `CITATION.cff` so they cannot drift.
+- Toolbox packaging: `tools/package_toolbox.m` builds a distributable
+  `mlock-<version>.mltbx` (installs as a MATLAB Add-On), and a `release.yml`
+  workflow attaches it to each GitHub Release on tag push.
 
 ## [0.4.0] - 2026-07-31
 

@@ -53,11 +53,18 @@ that gap by turning an entry point into a committed, verifiable manifest.
 
 ## Install
 
-Put the folder that **contains** `+mlock` on your path:
+**As a Toolbox (Add-On).** Download `mlock-<version>.mltbx` from the
+[latest release](https://github.com/hmorao95/mlock/releases/latest) and
+double-click it (or run `matlab.addons.install("mlock-<version>.mltbx")`). It
+installs to your Add-Ons and is on the path automatically — nothing to `addpath`.
+
+**From source.** Put the folder that **contains** `+mlock` on your path:
 
 ```matlab
 addpath('C:\path\to\mlock');   % the parent of +mlock
 ```
+
+To build the `.mltbx` yourself: `addpath('tools'); package_toolbox('dist')`.
 
 ## Usage
 
