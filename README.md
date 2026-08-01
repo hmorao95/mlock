@@ -143,7 +143,7 @@ res = mlock.resolve("main.m");   % .files .externalFiles .products .root
 {
   "schema": "mlock-lock",
   "schema_version": 3,
-  "generator": { "name": "mlock", "version": "0.4.0" },   // which tool wrote it
+  "generator": { "name": "mlock", "version": "0.5.0" },   // which tool wrote it
   "generated": "2026-07-31 12:00:00",           // omitted when Timestamp=false
   "matlab": { "version": "...", "release": "2026b", "arch": "win64" },
   "hash": { "algorithm": "sha256", "normalize_newlines": true },

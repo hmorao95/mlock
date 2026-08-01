@@ -18,5 +18,5 @@ function v = version()
 % See also:
 %   mlock.lock
 
-v = '0.4.0';
+v = '0.5.0';
 end
