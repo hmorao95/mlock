@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   entry points, Extra patterns, and hashing policy (the fix for `status` drift).
 - `mlock.audit` — one call runs verify + status + check and returns a single
   pass/fail; the reproducibility gate to drop in CI or a replication script.
+- Git provenance: when the project is in a git repo, the lock records a `git`
+  block (`commit`, `branch`, `dirty`) so it ties to an exact source revision.
+  New `Git` option on `mlock.lock` (default `true`) opts out; omitted entirely
+  for non-git projects.
 
 ## [0.5.0] - 2026-08-01
 

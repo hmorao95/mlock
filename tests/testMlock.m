@@ -314,7 +314,46 @@ appendText(fullfile(tc.TestData.proj, 'lib', 'helper.m'), "% edited");
 verifyFalse(tc, ok, 'Editing a pinned file must fail the audit (via verify).');
 end
 
+function testNonGitProjectHasNoGitBlock(tc)
+% The per-test temp project is not a git repo, so no git block should appear.
+lk = mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Write=false, Verbose=false);
+verifyFalse(tc, isfield(lk, 'git'), 'Non-git projects must not get a git block.');
+end
+
+function testGitProvenanceRecorded(tc)
+[gitStatus, ~] = system('git --version');
+assumeEqual(tc, gitStatus, 0, 'git is required for this test.');
+repo = tempname;
+mkdir(repo);
+c = onCleanup(@() rmdir(repo, 's'));
+writeText(fullfile(repo, 'main.m'), ["function main()"; "  disp(1);"; "end"]);
+% init + commit so HEAD exists (inline identity so CI runners without a
+% configured user can still commit).
+runGitOrSkip(tc, repo, 'init -q');
+runGitOrSkip(tc, repo, 'add -A');
+runGitOrSkip(tc, repo, '-c user.email=t@e -c user.name=t commit -q -m init');
+
+lk = mlock.lock("main.m", ProjectRoot=repo, Write=false, Verbose=false);
+verifyTrue(tc, isfield(lk, 'git'), 'A git repo must produce a git block.');
+verifyMatches(tc, lk.git.commit, '^[0-9a-f]{40}$');
+verifyFalse(tc, lk.git.dirty, 'Freshly committed tree must be clean.');
+
+% Dirtying the tree flips the flag.
+appendText(fullfile(repo, 'main.m'), "% edit");
+lk2 = mlock.lock("main.m", ProjectRoot=repo, Write=false, Verbose=false);
+verifyTrue(tc, lk2.git.dirty, 'Uncommitted change must mark the tree dirty.');
+
+% Git=false suppresses provenance entirely.
+lk3 = mlock.lock("main.m", ProjectRoot=repo, Git=false, Write=false, Verbose=false);
+verifyFalse(tc, isfield(lk3, 'git'), 'Git=false must omit the git block.');
+end
+
 % ======================================================================
+function runGitOrSkip(tc, repo, args)
+st = system(sprintf('git -C "%s" %s', repo, args));
+assumeEqual(tc, st, 0, sprintf('git %s failed', args));
+end
+
 function writeText(fname, lines)
 lines = cellstr(lines);
 fid = fopen(fname, 'w');
