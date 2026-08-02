@@ -121,7 +121,16 @@ introduced that isn't pinned yet. Complements `verify` (content) with set drift.
 % report.addedFiles / .removedFiles / .addedProducts / .removedProducts / .changedProducts
 ```
 
-### 4. Check (can this machine run it?)
+### 4. Update (re-lock in place)
+
+When `status` shows drift, refresh the lock **using its own stored entry points,
+Extra patterns, and hashing policy** — no need to retype the original `lock` call.
+
+```matlab
+mlock.update("mlock.lock.json");   % re-resolve and overwrite the lock
+```
+
+### 5. Check (can this machine run it?)
 
 Confirms the MATLAB release and locked products are available here.
 
@@ -129,6 +138,16 @@ Confirms the MATLAB release and locked products are available here.
 ok = mlock.check("mlock.lock.json");
 ok = mlock.check("mlock.lock.json", RequireSameRelease=true);
 ok = mlock.check("mlock.lock.json", RequireSameProductVersions=true);
+```
+
+### 6. Audit (one-call gate)
+
+Runs **verify + status + check** and returns a single pass/fail — the one line to
+drop in CI or at the top of a replication script.
+
+```matlab
+assert(mlock.audit("mlock.lock.json"), "environment or project drift");
+[report, ok] = mlock.audit("mlock.lock.json");   % report.verify / .status / .check
 ```
 
 ### Low-level: resolve only
@@ -165,7 +184,9 @@ mlock/
 │   ├── lock.m         % resolve + hash + write lockfile
 │   ├── verify.m       % re-hash pinned files, detect content drift
 │   ├── status.m       % re-resolve, detect dependency-set drift
+│   ├── update.m       % re-lock in place from the lock's own metadata
 │   ├── check.m        % verify release + products on this machine
+│   ├── audit.m        % verify + status + check in one call
 │   ├── resolve.m      % low-level dependency discovery
 │   └── +internal/     % helpers (absPath, sha256File, hashFiles, ...)
 ├── tests/

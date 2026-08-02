@@ -274,6 +274,46 @@ verifyEqual(tc, string(mlock.version()), string(tok{1}), ...
     'mlock.version() must match CITATION.cff.');
 end
 
+function testUpdateBringsLockBackInSync(tc)
+mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Verbose=false);
+% Introduce a new dependency -> status should report drift.
+writeText(fullfile(tc.TestData.proj, 'lib', 'newdep.m'), ...
+    ["function y = newdep()"; "  y = 9;"; "end"]);
+writeText(fullfile(tc.TestData.proj, 'main.m'), ...
+    ["function main()"; "  disp(helper(2) + newdep());"; "end"]);
+[~, before] = mlock.status(tc.TestData.lock, Verbose=false);
+verifyFalse(tc, before, 'Precondition: status should show drift.');
+% Update rewrites the lock from its own metadata.
+mlock.update(tc.TestData.lock, Verbose=false);
+[~, after] = mlock.status(tc.TestData.lock, Verbose=false);
+verifyTrue(tc, after, 'After update, status must be in sync again.');
+end
+
+function testUpdatePreservesTimestampAndExtra(tc)
+mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Extra="data/*.csv", ...
+    Timestamp=false, Verbose=false);
+mlock.update(tc.TestData.lock, Verbose=false);
+lk = jsondecode(fileread(tc.TestData.lock));
+verifyFalse(tc, isfield(lk, 'generated'), 'Timestamp=false policy must be preserved.');
+verifyEqual(tc, string(lk.extra), "data/*.csv", 'Extra patterns must be preserved.');
+verifyTrue(tc, ismember("data/in.csv", string({lk.files.path})), ...
+    'Extra-pinned data file must still be present after update.');
+end
+
+function testAuditPassesOnFreshLock(tc)
+mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Extra="data/*.csv", Verbose=false);
+[report, ok] = mlock.audit(tc.TestData.lock, Verbose=false);
+verifyTrue(tc, ok, 'A fresh lock on the same machine must pass the audit.');
+verifyTrue(tc, report.ok);
+end
+
+function testAuditFailsOnContentChange(tc)
+mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Verbose=false);
+appendText(fullfile(tc.TestData.proj, 'lib', 'helper.m'), "% edited");
+[~, ok] = mlock.audit(tc.TestData.lock, Verbose=false);
+verifyFalse(tc, ok, 'Editing a pinned file must fail the audit (via verify).');
+end
+
 % ======================================================================
 function writeText(fname, lines)
 lines = cellstr(lines);
