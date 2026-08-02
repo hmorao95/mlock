@@ -36,6 +36,8 @@ function res = resolve(entryPoints, opts)
 %    root (string) absolute project root;
 %    files (string) project-relative file paths (posix '/');
 %    externalFiles (string) absolute paths outside the project;
+%    foreignFiles (string) externals outside matlabroot too (posix) - suspect
+%      unbundled deps / path pollution; a warning is also raised for these;
 %    products (struct) with fields name, version, product_number, certain.
 %
 % Usage:
@@ -176,6 +178,24 @@ end
 files = unique(files);          % also sorts -> deterministic ordering
 external = unique(external);
 
+% --- Flag "foreign" externals: required files outside BOTH the project and
+% matlabroot. Toolbox code lives under matlabroot; anything else almost always
+% means an unbundled dependency or a stray project polluting the MATLAB path
+% (which would otherwise leak into the lockfile silently). Surface it loudly.
+foreign = strings(0);
+for i = 1:numel(external)
+    if strlength(mlock.internal.toRel(external(i), string(matlabroot))) == 0
+        foreign(end+1) = mlock.internal.toPosix(external(i)); %#ok<AGROW>
+    end
+end
+if ~isempty(foreign)
+    warning('mlock:resolve:foreignExternals', ...
+        ['%d required file(s) resolved outside both the project and matlabroot ' ...
+         '- likely an unbundled dependency or a polluted MATLAB path. Bundle ' ...
+         'them into the project (or clean your path) and re-lock:\n  %s'], ...
+        numel(foreign), strjoin(foreign, sprintf('\n  ')));
+end
+
 % --- Normalize product list (sorted by name for stable lockfile diffs) ---
 % requiredFilesAndProducts does not guarantee a stable product order; sorting by
 % name means re-locking an unchanged project produces an identical list.
@@ -196,6 +216,7 @@ res.entryPoints   = eps;        % absolute entry paths (strings)
 res.root          = root;       % absolute project root
 res.files         = files;      % project-relative, posix, sorted
 res.externalFiles = external;   % absolute out-of-project paths
+res.foreignFiles  = foreign;    % externals outside matlabroot (posix); suspect
 res.products      = products;   % sorted struct array
 
 if opts.Verbose

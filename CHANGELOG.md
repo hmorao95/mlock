@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   New `Git` option on `mlock.lock` (default `true`) opts out; omitted entirely
   for non-git projects.
 
+### Changed
+
+- `resolve` now warns (`mlock:resolve:foreignExternals`) when a required file
+  resolves outside **both** the project and `matlabroot` — a strong signal of an
+  unbundled dependency or a polluted MATLAB path leaking stray files into
+  `external_files`. Exposed as `res.foreignFiles` for programmatic checks.
+
 ## [0.5.0] - 2026-08-01
 
 ### Added

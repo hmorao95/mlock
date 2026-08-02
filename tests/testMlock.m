@@ -314,6 +314,24 @@ appendText(fullfile(tc.TestData.proj, 'lib', 'helper.m'), "% edited");
 verifyFalse(tc, ok, 'Editing a pinned file must fail the audit (via verify).');
 end
 
+function testForeignExternalIsFlagged(tc)
+% A dependency resolved from an unrelated folder on the path (not the project,
+% not matlabroot) must be reported in foreignFiles and raise a warning.
+foreign = tempname;
+mkdir(foreign);
+writeText(fullfile(foreign, 'stray_helper.m'), ["function y = stray_helper()"; "  y = 5;"; "end"]);
+writeText(fullfile(tc.TestData.proj, 'main.m'), ...
+    ["function main()"; "  disp(stray_helper());"; "end"]);
+addpath(foreign);
+c = onCleanup(@() cleanupForeign(foreign));
+
+res = verifyWarning(tc, ...
+    @() mlock.resolve("main.m", ProjectRoot=tc.TestData.proj, Verbose=false), ...
+    'mlock:resolve:foreignExternals');
+verifyTrue(tc, any(contains(res.foreignFiles, "stray_helper.m")), ...
+    'The stray-path dependency must be listed in foreignFiles.');
+end
+
 function testNonGitProjectHasNoGitBlock(tc)
 % The per-test temp project is not a git repo, so no git block should appear.
 lk = mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Write=false, Verbose=false);
@@ -349,6 +367,15 @@ verifyFalse(tc, isfield(lk3, 'git'), 'Git=false must omit the git block.');
 end
 
 % ======================================================================
+function cleanupForeign(d)
+warning('off', 'MATLAB:rmpath:DirNotFound');
+try, rmpath(d); catch, end
+warning('on', 'MATLAB:rmpath:DirNotFound');
+if isfolder(d)
+    rmdir(d, 's');
+end
+end
+
 function runGitOrSkip(tc, repo, args)
 st = system(sprintf('git -C "%s" %s', repo, args));
 assumeEqual(tc, st, 0, sprintf('git %s failed', args));
