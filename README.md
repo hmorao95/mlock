@@ -165,6 +165,7 @@ res = mlock.resolve("main.m");   % .files .externalFiles .products .root
   "generator": { "name": "mlock", "version": "0.5.0" },   // which tool wrote it
   "generated": "2026-07-31 12:00:00",           // omitted when Timestamp=false
   "matlab": { "version": "...", "release": "2026b", "arch": "win64" },
+  "git": { "commit": "a5b61ff…", "branch": "main", "dirty": false },  // if a git repo
   "hash": { "algorithm": "sha256", "normalize_newlines": true },
   "entry_points": ["main.m"],                    // relative to the project root
   "extra": ["data/*.csv"],                       // Extra globs, for mlock.status
