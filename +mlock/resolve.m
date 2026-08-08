@@ -26,6 +26,10 @@ function res = resolve(entryPoints, opts)
 %      Folder that defines "inside the project". Files under it are returned as
 %      project-relative paths; everything else is external. Default: folder of
 %      the first entry point.
+%    - CleanPath (logical) -
+%      Resolve on a factory-default path (MathWorks toolboxes only) plus the
+%      project, so unrelated projects on your MATLAB path cannot leak into the
+%      result. Default: ``false``. The original path is always restored.
 %    - Verbose (logical) -
 %      Print a short progress line. Default: ``true``.
 %
@@ -56,6 +60,9 @@ arguments
     entryPoints (1,:) string
     % Empty "" is the "not supplied" sentinel; strlength()>0 tests for it below.
     opts.ProjectRoot (1,1) string = ""
+    % Resolve against a factory-default path (MathWorks toolboxes only) + the
+    % project, so a stray project on the current path cannot leak into the lock.
+    opts.CleanPath (1,1) logical = false
     opts.Verbose (1,1) logical = true
 end
 
@@ -152,6 +159,14 @@ oldPath = path();                                   % snapshot to restore later
 % onCleanup restores the path even if the analysis errors out (exception-safe);
 % we still clear it explicitly right after the call to restore ASAP on success.
 restorePath = onCleanup(@() path(oldPath)); %#ok<NASGU>
+if opts.CleanPath
+    % Reset to the factory path (MathWorks toolboxes only) so nothing the user
+    % has on their path - notably unrelated projects - can be resolved and leak
+    % into the lock. IMPORTANT: this removes +mlock from the path too, so no
+    % mlock.internal.* call may run until the path is restored below; only core
+    % builtins (addpath/genpath/fileparts/requiredFilesAndProducts) run here.
+    restoredefaultpath();
+end
 addpath(genpath(char(root)));                       % all project subfolders
 for i = 1:numel(eps)                                % cover entries outside root too
     addpath(fileparts(char(eps(i))));
@@ -159,7 +174,7 @@ end
 % flist: cellstr of absolute paths of every required user file (incl. entries).
 % plist: struct array of required products (Name/Version/ProductNumber/Certain).
 [flist, plist] = matlab.codetools.requiredFilesAndProducts(cellstr(eps));
-clear restorePath;   % triggers the onCleanup now -> path restored on success
+clear restorePath;   % triggers the onCleanup now -> full path restored on success
 flist = string(flist(:)');                          % -> string row for slicing
 
 % --- Split required files into internal (project) and external ---

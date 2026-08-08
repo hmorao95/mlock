@@ -332,6 +332,33 @@ verifyTrue(tc, any(contains(res.foreignFiles, "stray_helper.m")), ...
     'The stray-path dependency must be listed in foreignFiles.');
 end
 
+function testCleanPathKeepsForeignFilesOut(tc)
+% With an unrelated folder on the path, the default records the stray file (and
+% warns); CleanPath resolves on a factory path so it cannot leak in at all.
+foreign = tempname;
+mkdir(foreign);
+writeText(fullfile(foreign, 'stray_helper.m'), ["function y = stray_helper()"; "  y = 5;"; "end"]);
+writeText(fullfile(tc.TestData.proj, 'main.m'), ...
+    ["function main()"; "  disp(stray_helper());"; "end"]);
+addpath(foreign);
+c = onCleanup(@() cleanupForeign(foreign));
+
+% Default behaviour: stray file is recorded and a warning is raised.
+resDirty = verifyWarning(tc, ...
+    @() mlock.resolve("main.m", ProjectRoot=tc.TestData.proj, Verbose=false), ...
+    'mlock:resolve:foreignExternals');
+verifyTrue(tc, any(contains(resDirty.externalFiles, "stray_helper.m")));
+
+% CleanPath: the stray project is off the path, so it never enters the result.
+resClean = mlock.resolve("main.m", ProjectRoot=tc.TestData.proj, ...
+    CleanPath=true, Verbose=false);
+verifyFalse(tc, any(contains(resClean.externalFiles, "stray_helper.m")), ...
+    'CleanPath must keep stray-path files out of the resolution.');
+verifyEmpty(tc, resClean.foreignFiles);
+% The project's own files are still resolved on the clean path.
+verifyTrue(tc, ismember("main.m", resClean.files));
+end
+
 function testNonGitProjectHasNoGitBlock(tc)
 % The per-test temp project is not a git repo, so no git block should appear.
 lk = mlock.lock("main.m", ProjectRoot=tc.TestData.proj, Write=false, Verbose=false);
