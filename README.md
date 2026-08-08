@@ -94,6 +94,7 @@ Key options (name-value):
 | `HashExternal` | Also hash out-of-project files (toolboxes) | `false` |
 | `NormalizeNewlines` | Hash text files newline-insensitively (LF) so locks verify across Windows/Unix | `true` |
 | `Timestamp` | Embed a `generated` timestamp; set `false` for byte-reproducible locks | `true` |
+| `CleanPath` | Resolve on a factory-default path (toolboxes + project only) so unrelated projects on your path can't leak into `external_files` | `false` |
 | `Meta` | Free-form struct embedded under `"run"` | `struct()` |
 | `Write` | Write the file | `true` |
 

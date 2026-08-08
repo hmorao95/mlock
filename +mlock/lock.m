@@ -41,6 +41,10 @@ function lk = lock(entryPoints, opts)
 %    - Timestamp (logical) -
 %      Embed a ``generated`` timestamp. Set ``false`` for byte-reproducible
 %      lockfiles (no churn when dependencies are unchanged). Default: ``true``.
+%    - CleanPath (logical) -
+%      Resolve on a factory-default path (MathWorks toolboxes only) plus the
+%      project, so unrelated projects on your MATLAB path cannot leak into
+%      ``external_files``. Default: ``false``.
 %    - Git (logical) -
 %      Record git provenance (commit, branch, dirty flag) when the project is in
 %      a git repo, under a ``git`` block. Default: ``true`` (omitted for non-git
@@ -84,6 +88,7 @@ arguments
     opts.HashExternal     (1,1) logical = false
     opts.NormalizeNewlines (1,1) logical = true
     opts.Timestamp        (1,1) logical = true
+    opts.CleanPath        (1,1) logical = false
     opts.Git              (1,1) logical = true
     opts.Meta             (1,1) struct  = struct()
     opts.Write            (1,1) logical = true
@@ -92,7 +97,8 @@ end
 
 % Step 1: discover dependencies. resolve() does the code analysis and returns
 % project files (relative), external files (absolute), products, and the root.
-res  = mlock.resolve(entryPoints, ProjectRoot=opts.ProjectRoot, Verbose=opts.Verbose);
+res  = mlock.resolve(entryPoints, ProjectRoot=opts.ProjectRoot, ...
+    CleanPath=opts.CleanPath, Verbose=opts.Verbose);
 root = res.root;
 
 % --- Collect the project-relative files to pin (resolved + extras) ---

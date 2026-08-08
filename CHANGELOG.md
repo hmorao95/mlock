@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `CleanPath` option on `mlock.lock` / `mlock.resolve` / `mlock.update` (default
+  `false`): resolves against a factory-default path (MathWorks toolboxes only)
+  plus the project, so unrelated projects on the MATLAB path cannot leak into
+  `external_files`. Turns the foreign-externals *warning* into a *prevention*.
+
 ## [0.6.0] - 2026-08-02
 
 ### Added

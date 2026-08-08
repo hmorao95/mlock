@@ -38,6 +38,7 @@ function lk = update(lockPath, opts)
 arguments
     lockPath (1,1) string
     opts.ProjectRoot (1,1) string = ""
+    opts.CleanPath (1,1) logical = false
     opts.Verbose (1,1) logical = true
 end
 
@@ -97,7 +98,7 @@ git = isfield(old, 'git');   % preserve whether provenance was recorded
 % --- Rewrite the lock in place ---
 lk = mlock.lock(epAbs, ProjectRoot=root, Output=lockPath, Extra=extra, ...
     NormalizeNewlines=normalize, Timestamp=timestamp, HashExternal=hashExternal, ...
-    Git=git, Meta=meta, Verbose=opts.Verbose);
+    CleanPath=opts.CleanPath, Git=git, Meta=meta, Verbose=opts.Verbose);
 
 if opts.Verbose
     fprintf('mlock: lock updated in place: %s\n', lockPath);
